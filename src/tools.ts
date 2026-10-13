@@ -117,25 +117,47 @@ registerTool({
     handler: (args: unknown) => {
 
         // 当前先将参数断言为预期类型
-        const params = args as {
-            a: number;
-            b: number;
-            operation: string;
-        };
+        // const params = args as {
+        //     a: number;
+        //     b: number;
+        //     operation: string;
+        // };
+        if (
+            typeof args !== "object" ||
+            args === null ||
+            !("a" in args) ||
+            !("b" in args) ||
+            !("operation" in args)
+        ) {
+            throw new Error("calculator 参数结构不正确");
+        }
 
-        switch (params.operation) {
+        const { a, b, operation } = args;
+
+        if (
+            typeof a !== "number" ||
+            !Number.isFinite(a) ||
+            typeof b !== "number" ||
+            !Number.isFinite(b) ||
+            typeof operation !== "string"
+        ) {
+            throw new Error("calculator 参数类型不正确");
+        }
+
+        switch (operation) {
             case "add":
-                return String(params.a + params.b);
+                return String(a + b);
 
             case "subtract":
-                return String(params.a - params.b);
+                return String(a - b);
 
             case "multiply":
-                return String(params.a * params.b);
-
+                return String(a * b);
             case "divide":
-                return String(params.a / params.b);
-
+                if (b === 0) {
+                    throw new Error("除数不能为 0");
+                }
+                return String(a / b);
             default:
                 return "不支持的计算方式";
         }
