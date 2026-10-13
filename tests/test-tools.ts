@@ -1,4 +1,4 @@
-import { executeTool } from "./tools";
+import { executeTool } from "../src/tools";
 
 async function main() {
 

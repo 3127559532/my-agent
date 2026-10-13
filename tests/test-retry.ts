@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { withRetry } from "./retry";
+import { withRetry } from "../src/retry";
 
 async function main() {
 

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "start": "tsx src/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:retry": "tsx tests/test-retry.ts",
+    "test:tools": "tsx tests/test-tools.ts"
   },
   "keywords": [],
   "author": "",
