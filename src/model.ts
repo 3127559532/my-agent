@@ -12,16 +12,22 @@ const client = new OpenAI({
 
 
 export async function chat(
-    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]
+    messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+    signal?: AbortSignal
 ) {
     try {
-        return await withRetry(() =>
-            client.chat.completions.create({
+        return await withRetry(
+            () => client.chat.completions.create(
+                {
                 model: process.env.MODEL_NAME!,
                 messages,
                 tools: getToolDefinitions(),
                 tool_choice: "auto"
+            },
+            {
+                    signal
             })
+            ,signal
         );
     } catch (error: unknown) {
         if (error instanceof OpenAI.AuthenticationError) {

@@ -4,7 +4,10 @@ import {executeTool} from "./tools";
 
 type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
-export async function runAgent(userInput: string) {
+export async function runAgent(
+    userInput: string,
+    signal?: AbortSignal
+) {
     const messages: Message[] = [
         {role: "user", content: userInput}
     ];
@@ -17,9 +20,10 @@ export async function runAgent(userInput: string) {
 
     while (modelCallCount < MAX_MODEL_CALLS) {
         modelCallCount++;
+        signal?.throwIfAborted();
         console.log(`Agent 模型调用: ${modelCallCount}/${MAX_MODEL_CALLS}`);
         //1.请求模型
-        const response = await chat(messages);
+        const response = await chat(messages,signal);
         const choice = response.choices[0];
 
         if (!choice) {
@@ -41,6 +45,7 @@ export async function runAgent(userInput: string) {
                 const toolName = toolCall.function.name;
                 console.log("AGENT 调用工具：", toolName)
 
+                signal?.throwIfAborted();
                 //4.执行本地工具
                 const result = await executeTool(
                     /*工具名称*/
