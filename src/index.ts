@@ -1,7 +1,7 @@
 import { runAgent } from "./agent";
 
 async function main() {
-  const response = await runAgent("请调用 calculator 工具计算 128 乘以 36，告诉我结果");
+  const response = await runAgent("使用 calculator 计算 100 除以 0，并解释结果");
 
   console.log("模型回答:",response);
 }

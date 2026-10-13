@@ -69,11 +69,21 @@ export async function executeTool(
 ): Promise<string> {
 
     const tool = registry.get(name);
+
     if (!tool) {
-        return `未知工具: ${name}`;
+        return `工具执行失败: 未知工具: ${name}`;
     }
-    const parsedArgs: unknown = JSON.parse(args);
-    return await tool.handler(parsedArgs)
+
+    try {
+
+        const parsedArgs: unknown = JSON.parse(args);
+        return await tool.handler(parsedArgs)
+
+    } catch (error: unknown) {
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return `工具执行失败: ${errorMessage}`;
+    }
 
 }
 
@@ -104,15 +114,15 @@ registerTool({
             },
             b: {
                 type: "number",
-                description:"第二个参数"
+                description: "第二个参数"
             },
-            operation:{
-                type:"string",
-                enum:["add","subtract","multiply","divide"],
-                description:"运算类型"
+            operation: {
+                type: "string",
+                enum: ["add", "subtract", "multiply", "divide"],
+                description: "运算类型"
             }
         },
-        required: ["a","b","operation"]
+        required: ["a", "b", "operation"]
     },
     handler: (args: unknown) => {
 
@@ -132,7 +142,7 @@ registerTool({
             throw new Error("calculator 参数结构不正确");
         }
 
-        const { a, b, operation } = args;
+        const {a, b, operation} = args;
 
         if (
             typeof a !== "number" ||
