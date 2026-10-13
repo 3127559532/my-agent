@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import "dotenv/config";
+import {withRetry} from "./retry";
 import {getToolDefinitions} from "./tools";
+
 const client = new OpenAI({
     apiKey: process.env.MODEL_API_KEY,
     baseURL: process.env.MODEL_BASE_URL,
@@ -9,39 +11,18 @@ const client = new OpenAI({
 })
 
 
-// export async function chat(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]) {
-//     return await client.chat.completions.create({
-//         model: process.env.MODEL_NAME!,
-//         messages,
-//         // tools: [
-//         //     {
-//         //         type: "function",
-//         //         function: {
-//         //             name: "get_current_time",
-//         //             description: "获取当前系统时间",
-//         //             parameters: {
-//         //                 type: "object",
-//         //                 properties: {},
-//         //                 required: [],
-//         //             }
-//         //         }
-//         //
-//         //     }
-//         // ],
-//         tools: getToolDefinitions(),
-//         tool_choice: "auto"
-//     })
-// }
 export async function chat(
     messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]
 ) {
     try {
-        return await client.chat.completions.create({
-            model: process.env.MODEL_NAME!,
-            messages,
-            tools: getToolDefinitions(),
-            tool_choice: "auto"
-        });
+        return await withRetry(() =>
+            client.chat.completions.create({
+                model: process.env.MODEL_NAME!,
+                messages,
+                tools: getToolDefinitions(),
+                tool_choice: "auto"
+            })
+        );
     } catch (error: unknown) {
         if (error instanceof OpenAI.AuthenticationError) {
             throw new Error(
@@ -72,7 +53,7 @@ export async function chat(
         if (error instanceof OpenAI.APIError) {
             throw new Error(
                 `模型 API 请求失败，HTTP 状态码：${error.status ?? "未知"}`,
-                { cause: error }
+                {cause: error}
             );
         }
 
