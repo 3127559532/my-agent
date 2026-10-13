@@ -1,7 +1,6 @@
 import type OpenAI from "openai";
 
 
-
 /**
  * 通用工具执行函数类型。
  * 接收一个未知类型的参数值，通常是模型返回的 JSON 参数对象。
@@ -47,10 +46,10 @@ export function registerTool(tool: ToolDefinition): void {
  * value function 工具的几个属性  里面包含三个参数 特别点，不要把handler给到AI
  */
 export function getToolDefinitions():
-    OpenAI.Chat.Completions.ChatCompletionTool[]{
-    return  Array.from(registry.values()).map(tool =>({
+    OpenAI.Chat.Completions.ChatCompletionTool[] {
+    return Array.from(registry.values()).map(tool => ({
         type: "function" as const,
-        function:{
+        function: {
             name: tool.name,
             description: tool.description,
             parameters: tool.parameters,
@@ -74,21 +73,72 @@ export async function executeTool(
         return `未知工具: ${name}`;
     }
     const parsedArgs: unknown = JSON.parse(args);
-    return  await tool.handler(parsedArgs)
+    return await tool.handler(parsedArgs)
 
 }
 
 //注册时间工具
 registerTool({
     name: "get_current_time",
-    description:"获取当前系统日期和时间",
-    parameters:{
-        type:"object",
-        properties:{},
-        required:[]
+    description: "获取当前系统日期和时间",
+    parameters: {
+        type: "object",
+        properties: {},
+        required: []
     },
-    handler:()=>{
+    handler: () => {
         return new Date().toLocaleString("zh-CN");
+    }
+});
+
+//V3-A 注册带参数的计算器工具
+registerTool({
+    name: "calculator",
+    description: "执行两个数字的加减乘除运算",
+    parameters: {
+        type: "object",
+        properties: {
+            a: {
+                type: "number",
+                description: "第一个数字"
+            },
+            b: {
+                type: "number",
+                description:"第二个参数"
+            },
+            operation:{
+                type:"string",
+                enum:["add","subtract","multiply","divide"],
+                description:"运算类型"
+            }
+        },
+        required: ["a","b","operation"]
+    },
+    handler: (args: unknown) => {
+
+        // 当前先将参数断言为预期类型
+        const params = args as {
+            a: number;
+            b: number;
+            operation: string;
+        };
+
+        switch (params.operation) {
+            case "add":
+                return String(params.a + params.b);
+
+            case "subtract":
+                return String(params.a - params.b);
+
+            case "multiply":
+                return String(params.a * params.b);
+
+            case "divide":
+                return String(params.a / params.b);
+
+            default:
+                return "不支持的计算方式";
+        }
     }
 });
 
