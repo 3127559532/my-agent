@@ -36,19 +36,11 @@ export async function runAgent(userInput: string) {
                 console.log("AGENT 调用工具：", toolName)
 
                 //4.执行本地工具
-                // let result: string;
-                //
-                // if(toolName ==="get_current_time"){
-                //     result = new Date().toLocaleString("zh-CN");
-                // }else{
-                //     result =   `未知工具${toolName}`;
-                // }
                 const result = await executeTool(
                     /*工具名称*/
                     toolName,
                     /* 模型生成的工具调用参数 */
                     toolCall.function.arguments);
-
 
                 //5.将工具执行结果添加到历史信息
                 messages.push({
@@ -57,6 +49,7 @@ export async function runAgent(userInput: string) {
                     content: result
                 });
             }
+
             //6.带着工具结果再次请求模型
             continue;
         }
