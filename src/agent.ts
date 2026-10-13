@@ -10,8 +10,14 @@ export async function runAgent(userInput: string) {
     ];
 
     let finalAnswer = "";
-    while (true) {
 
+    let completed = false;
+    const  MAX_MODEL_CALLS = 5;
+    let modelCallCount = 0;
+
+    while (modelCallCount < MAX_MODEL_CALLS) {
+        modelCallCount++;
+        console.log(`Agent 模型调用: ${modelCallCount}/${MAX_MODEL_CALLS}`);
         //1.请求模型
         const response = await chat(messages);
         const choice = response.choices[0];
@@ -57,7 +63,11 @@ export async function runAgent(userInput: string) {
 
         //7.没有工具调用，本轮结束
         finalAnswer = message.content ?? "";
+        completed = true;
         break;
+    }
+    if(!completed){
+        throw new Error(`Agent 已到达最大调用次数: ${MAX_MODEL_CALLS}`);
     }
     // 循环结束后执行
     console.dir(messages, {depth: null});
