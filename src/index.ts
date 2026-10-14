@@ -1,29 +1,29 @@
 import { runAgent } from "./agent";
+import { createSession } from "./session";
 
 async function main() {
-  const controller = new AbortController();
+  const session = createSession();
 
-  const timer = setTimeout(() => {
-    console.log("用户请求停止 Agent");
-    controller.abort();
-  }, 60000);
+  console.log("Session ID:", session.id);
 
-  try {
-    const answer = await runAgent(
-        "请使用 calculator 计算 128 乘以 36",
-        controller.signal
-    );
+  const answer1 = await runAgent(
+      session,
+      "我最喜欢的编程语言是 Python，请记住这个信息。"
+  );
 
-    console.log("模型回答：", answer);
-  } finally {
-    clearTimeout(timer);
-  }
+  console.log("第一轮回答：", answer1);
+
+  const answer2 = await runAgent(
+      session,
+      "我最喜欢的编程语言是什么？"
+  );
+
+  console.log("第二轮回答：", answer2);
+
+  console.log("历史消息数量：", session.messages.length);
 }
 
 main().catch(error => {
-  console.error(
-      "Agent 结束：",
-      error instanceof Error ? error.message : String(error)
-  );
+  console.error(error);
   process.exitCode = 1;
 });

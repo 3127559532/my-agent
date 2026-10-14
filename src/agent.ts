@@ -1,29 +1,37 @@
 import {chat} from "./model";
 import OpenAI from "openai";
 import {executeTool} from "./tools";
+import type {Session} from "./session";
+import {debug} from "./logger";
 
 type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 export async function runAgent(
+    session: Session,
     userInput: string,
     signal?: AbortSignal
 ) {
-    const messages: Message[] = [
-        {role: "user", content: userInput}
-    ];
+
+    //从传入的Session中取出message
+    const messages = session.messages;
+    //将本轮用户消息 + 历史消息
+    messages.push({
+        role: "user",
+        content: userInput
+    });
 
     let finalAnswer = "";
 
     let completed = false;
-    const  MAX_MODEL_CALLS = 5;
+    const MAX_MODEL_CALLS = 5;
     let modelCallCount = 0;
 
     while (modelCallCount < MAX_MODEL_CALLS) {
         modelCallCount++;
         signal?.throwIfAborted();
-        console.log(`Agent 模型调用: ${modelCallCount}/${MAX_MODEL_CALLS}`);
+        debug(`Agent 模型调用: ${modelCallCount}/${MAX_MODEL_CALLS}`);
         //1.请求模型
-        const response = await chat(messages,signal);
+        const response = await chat(messages, signal);
         const choice = response.choices[0];
 
         if (!choice) {
@@ -43,7 +51,7 @@ export async function runAgent(
                     throw new Error("暂不支持该工具类型");
                 }
                 const toolName = toolCall.function.name;
-                console.log("AGENT 调用工具：", toolName)
+                debug("AGENT 调用工具:", toolName);
 
                 signal?.throwIfAborted();
                 //4.执行本地工具
@@ -71,11 +79,11 @@ export async function runAgent(
         completed = true;
         break;
     }
-    if(!completed){
+    if (!completed) {
         throw new Error(`Agent 已到达最大调用次数: ${MAX_MODEL_CALLS}`);
     }
     // 循环结束后执行
-    console.dir(messages, {depth: null});
+    debug("Session 消息历史：", messages);
 
     return finalAnswer;
 
