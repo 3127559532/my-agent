@@ -4,7 +4,6 @@ import {executeTool} from "./tools";
 import type {Session} from "./session";
 import {debug} from "./logger";
 
-type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
 export async function runAgent(
     session: Session,
