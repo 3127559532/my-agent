@@ -1,5 +1,4 @@
 import {chat} from "./model";
-import OpenAI from "openai";
 import {executeTool} from "./tools";
 import type {Session} from "./session";
 import {debug} from "./logger";

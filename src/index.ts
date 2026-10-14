@@ -1,5 +1,4 @@
 import { runAgent } from "./agent";
-import { createSession } from "./session";
 import { SessionManager } from "./session";
 
 async function main() {
