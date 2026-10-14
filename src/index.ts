@@ -6,35 +6,32 @@ async function main() {
 
   const manager = new SessionManager();
 
-  // 1. 创建两个 Session
-  const sessionA = manager.createSession();
-  const sessionB = manager.createSession();
+  // 1. 创建Session
+  const session = manager.createSession();
+  const sessionId = session.id;
 
-  console.log("Session A:", sessionA.id);
-  console.log("Session B:", sessionB.id);
+  console.log("创建会话", sessionId);
 
-  // 2. 根据 ID 查询
-  const found = manager.getSession(sessionA.id);
 
-  console.log("查询是否为同一个对象:", found === sessionA);
+  // 2. 第一轮对话
+  const answer1 = await  runAgent(
+      session,
+      "我最喜欢的编程语言是python");
+  console.log("第一轮回答",answer1);
 
-  // 3. 查看全部会话
-  console.log("会话数量:", manager.listSessions().length);
-
-  // 4. 删除 Session A
-  const deleted = manager.deleteSession(sessionA.id);
-
-  console.log("删除成功:", deleted);
-  console.log("删除后会话数量:", manager.listSessions().length);
-
-  // 5. 再次查询已删除的 Session
-  console.log("查询已删除的会话:", manager.getSession(sessionA.id));
-
-  // 6. 验证 B 仍然存在
-  console.log(
-      "Session B 是否仍存在:",
-      manager.getSession(sessionB.id) === sessionB
+  //3. 第二 通过ID找回Session
+  const restoredSession = manager.getSession(sessionId);
+  if(!restoredSession){
+    throw  new Error("Session 不存在");
+  }
+  const answer2 = await  runAgent(
+      restoredSession,
+      "我刚才说我最喜欢的编程语言是什么?"
   );
+
+  console.log("第二轮回答",answer2);
+  console.log("历史消息数量:",restoredSession.messages.length);
+
 }
 
 main().catch(error => {
